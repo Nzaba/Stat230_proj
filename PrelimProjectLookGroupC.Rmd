@@ -1,0 +1,50 @@
+---
+title: "PrelimProjectLookGroupC"
+author: "Sam Schneider"
+date: "4/9/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Read in the data**
+
+```{r}
+require(readr)
+groupcdata <- read_csv("https://awagaman.people.amherst.edu/stat230/projectsS18/groupCdataS18.csv")
+
+```
+
+**Summary command on the data set**
+
+```{r}
+summary(groupcdata)
+```
+
+**Data Codebook**
+
+
+Our variable are: 
+
+Bedrooms - The number of bedrooms in the house (numeric)   
+Bathrooms - The number of bathrooms in the house (numeric)   
+sqft_lot - The total square footage of the property (numeric)  
+floors - The number of floors in the house (numeric)  
+waterfront - Indicator if the house has a waterfront view (categorical)  
+condition - The overall condition of the house based upon the King County grading system  
+yr_built - The year in which the house was built (numeric)
+zipcode = The ZIP code in which the house is located (categorical)
+
+**Analysis Plan**  
+
+1.	How much does the location of the home determine the value of that home? (Response Variable = Price , Explanatory Variable(s)= ZIP Code)
+2.	How much does having a waterfront view affect the impact of home location in determining home value?(Response Variable = Price , Explanatory Variable(s)= ZIP Code, Waterfront View, interaction term - ZIP Code : Waterfront View)
+3.	Is the square footage of a house a better predictor of home value than the number of bedrooms?(Response Variable = Price, Explanatory Variable(s)= Square Footage, Bedrooms)
+
+**Prelim Univariate Analysis**
+
+**Prelim Bivariate Analysis**
+
+**Randomization-Bsaed Procedure Thoughts**
