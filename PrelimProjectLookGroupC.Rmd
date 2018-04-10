@@ -26,7 +26,7 @@ summary(groupcdata)
 **Data Codebook**
 
 
-Our variable are: 
+Our variables are: 
 
 Bedrooms - The number of bedrooms in the house (numeric)   
 Bathrooms - The number of bathrooms in the house (numeric)   
