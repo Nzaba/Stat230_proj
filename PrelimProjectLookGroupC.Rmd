@@ -33,7 +33,7 @@ Bathrooms - The number of bathrooms in the house (numeric)
 sqft_lot - The total square footage of the property (numeric)  
 floors - The number of floors in the house (numeric)  
 waterfront - Indicator if the house has a waterfront view (categorical)  
-condition - The overall condition of the house based upon the King County grading system  
+condition - The overall condition of the house based upon the King County grading system (categorical)  
 yr_built - The year in which the house was built (numeric)
 zipcode = The ZIP code in which the house is located (categorical)
 
