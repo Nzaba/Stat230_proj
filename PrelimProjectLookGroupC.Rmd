@@ -73,7 +73,7 @@ The majority of houses in this market only have one floor and it is very rare to
 favstats(groupcdata$sqft_lot)
 densityplot(groupcdata$sqft_lot)
 ```
-The values for sqft in this market is extremely distorted by outliers. The mean value is over 15,000 square feet while the median is roughly half of the mean. This will be important to consider as we continue our analysis.
+The values for sqft in this market is extremely distorted by outliers. The mean value is over 15,000 square feet while the median is roughly half of the mean. This will be an important factor to consider as we continue our analysis.
 
 ```{r}
 tally(groupcdata$waterfront)
