@@ -2,7 +2,9 @@
 title: "PrelimProjectLookGroupC"
 author: "Sam Schneider, Raymond Saitoti, Brian Burrows"
 date: "4/9/2018"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -40,8 +42,8 @@ bedrooms - The number of bedrooms in the house (numeric: 0-33)
 bathrooms - The number of bathrooms in the house (numeric: 0-8)   
 sqft_lot - The total square footage of the property (numeric: 520-1651359)  
 floors - The number of floors in the house (numeric: 1-3.5)  
-waterfront - Indicator if the house has a waterfront view (categorical)  
-condition - The overall condition of the house based upon the King County grading system (categorical)  
+waterfront - Indicator if the house has a waterfront view (categorical: 0-1, where 0 is no waterfront view)  
+condition - The overall condition of the house based upon the King County grading system (categorical: 0-5)  
 yr_built - The year in which the house was built (numeric: 5/2/14 - 5/27/15)
 zipcode - The ZIP code in which the house is located (categorical)
 price - The price a house was sold for (numeric: 75000-7700000)
@@ -56,20 +58,16 @@ As stated in the proposal, we aim to create a model that can predict home values
 3. Is the square footage of a house a better predictor of home value than the number of bedrooms?(Response Variable = Price, Explanatory Variable(s)= Square Footage, Bedrooms)
 
 **Prelim Univariate Analysis**
-```{r}
 
-```
 ```{r}
 fav_stats(groupcdata$price)
 densityplot(groupcdata$price)
 ```
-
 The average price of a home in this market is $540,000 although this number is likely subject to outliers as shown by the density plot. Accordingly, the median is a lower value of $450,000.
 
 ```{r}
 histogram(groupcdata$condition)
 histogram(groupcdata$floors)
-
 ```
 The majority of houses in this market only have one floor and it is very rare to have more than 2 floors. Furthermore, the majority of the homes are in above average condition as most homes are graded at a 3 or above. 
 
@@ -84,12 +82,6 @@ tally(groupcdata$waterfront)
 ```
 It is very rare to have a waterfront home in this market. This could make it very valuable in terms of the price of the home.
 
-```{r}
-groupcdata$waterfront=as.factor(groupcdata$waterfront)
-groupcdata$condition=as.factor(groupcdata$condition)
-groupcdata$zipcode=as.factor(groupcdata$zipcode)
-```
-
 **Prelim Bivariate Analysis**
 
 We begin with simple analyses of the relationships price has with each of our predictors to see if transformations are necessary.
@@ -101,7 +93,7 @@ First is price and bedrooms.
 xyplot(price~bedrooms, main="House Price vs. Number of Bedrooms", data=groupcdata)
 with(groupcdata, cor(price,bedrooms))
 ```
-
+From the graph, we see that baseline home values seem to increase as the the number of bedrooms increases. However, home values seem to increase up to six bedrooms and decrease afterwards. This might most likely be the result of a small sample size for houses with more bedrooms than that. It might be worthwhile to consider bedrooms and zipcode together in future analysis. There is also one extreme outlier with more than thirty rooms. We might want to consider looking more closely at that point to determine if we should remove it. Also, as expected, home price and number of bedrooms seems to be positively correlated, although weakly so. 
 
 Second is price and bathrooms.
 
@@ -109,7 +101,7 @@ Second is price and bathrooms.
 xyplot(price~bathrooms, main="House Price vs. Number of Bathrooms", data=groupcdata)
 with(groupcdata, cor(price,bathrooms))
 ```
-
+The graph indicates a moderate positive relationship between price and number of bathrooms. However, it is worthwhile noting that there are far fewer observations for houses with five or more bathrooms. This might limit the scope to which we may predictions out of fear of extrapolation beyond the data.
 
 Third is price and square footage.
 
@@ -117,7 +109,7 @@ Third is price and square footage.
 xyplot(price~sqft_lot, main="House Price vs. Square Footage", data=groupcdata)
 with(groupcdata, cor(price,sqft_lot))
 ```
-
+The graph of house price and square footage indicates that transformations will most likely be required. Furthermore, very few observations exist for homes of more than 500,000 square feet. In addition, a correlation test indicates that price and square footage is very weakly positively correlated, which is expectated but not readily shown by the graph. 
 
 Fourth is price and floors.
 
@@ -125,21 +117,21 @@ Fourth is price and floors.
 xyplot(price~floors, main="House Price vs. Number of Floors", data=groupcdata)
 with(groupcdata, cor(price,floors))
 ```
-
+While the scatterplot was not particularly informative, a correlation test shows that price and number of floors are weakly positively correlated. However, the scatterplot does elucidate a number of high outliers that should be examined more closely, especially the one for 2.5 floors.
 
 Fifth is price and waterfront.
 
 ```{r}
-bwplot(price~waterfront, main="House Price vs Waterfront View", data=groupcdata)
+bwplot(price~waterfront, main="House Price vs Waterfront View", xlab="Waterfront View", data=groupcdata)
 ```
-
+Side by side boxplots of house price by waterfront view supports earlier univariate analysis as waterfront properties seem to have higher median price. Whether this difference is significant is something to be evaluated in a regression.
 
 Sixth is price and condition.
 
 ```{r}
-bwplot(price~condition, main="House Price vs Home Condition", data=groupcdata)
+bwplot(price~condition, main="House Price vs Home Condition", xlab=" Home Condition", data=groupcdata)
 ```
-
+The side-by-side boxplots of price by house condition shows fairly similar medians for each home condition group. Interestingly, there are a number of outliers for homes with conditions rated three or higher. This might be explained by location or age data in additional analysis. Also, an ANOVA will be run to see if the differences in house price between condition groups is significant.
 
 Seventh is price and year built.
 
@@ -147,7 +139,7 @@ Seventh is price and year built.
 xyplot(price~yr_built, main="House Price vs Year Built", data=groupcdata)
 with(groupcdata, cor(price, yr_built))
 ```
-
+The plot of price and year built tells us fairly little about the data, and a correlation coefficient of 0.054 is extremely weak. Year built might very well be a variable that we end up omitting from the model.
 
 Last is price and zipcode.
 
@@ -155,7 +147,7 @@ Last is price and zipcode.
 bwplot(price~zipcode, main="House Price vs Zipcode", data=groupcdata)
 ```
 
-
+Boxplots of price by zip-code seem to indicate differences in house price by zip-code. An ANOVA will be run to see if any of the differences are significant. Also, for the sake of legibility, we might consider renaming the zip-codes, which should help to make the horizontal axis more readible.
 
 **Randomization-Based Procedure Thoughts**
 
