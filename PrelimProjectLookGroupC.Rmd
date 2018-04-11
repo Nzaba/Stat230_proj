@@ -13,14 +13,22 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 require(readr)
+require(mosaic)
 groupcdata <- read_csv("https://awagaman.people.amherst.edu/stat230/projectsS18/groupCdataS18.csv")
 
 ```
 
 **Summary command on the data set**
 
+## Put data in right format.
 ```{r}
 summary(groupcdata)
+#Change Year, Month and Date to right format
+sales<-groupcdata %>% 
+  mutate(condition=as.factor(condition),id=1:n(),Year=as.factor(parse_number(Year)),Month=as.factor(parse_number(Month)),Date=as.factor(parse_number(Date)),waterfront=as.factor(waterfront),zipcode=as.factor(zipcode)) %>% 
+  rename(Day=Date) 
+
+
 ```
 
 **Data Codebook**
@@ -48,6 +56,33 @@ As stated in the proposal, we aim to create a model that can predict home values
 3. Is the square footage of a house a better predictor of home value than the number of bedrooms?(Response Variable = Price, Explanatory Variable(s)= Square Footage, Bedrooms)
 
 **Prelim Univariate Analysis**
+```{r}
+
+```
+```{r}
+fav_stats(groupcdata$price)
+densityplot(groupcdata$price)
+```
+
+The average price of a home in this market is $540,000 although this number is likely subject to outliers as shown by the density plot. Accordingly, the median is a lower value of $450,000.
+
+```{r}
+histogram(groupcdata$condition)
+histogram(groupcdata$floors)
+
+```
+The majority of houses in this market only have one floor and it is very rare to have more than 2 floors. Furthermore, the majority of the homes are in above average condition as most homes are graded at a 3 or above. 
+
+```{r}
+favstats(groupcdata$sqft_lot)
+densityplot(groupcdata$sqft_lot)
+```
+The values for sqft in this market is extremely distorted by outliers. The mean value is over 15,000 square feet while the median is roughly half of the mean. This will be an important factor to consider as we continue our analysis.
+
+```{r}
+tally(groupcdata$waterfront)
+```
+It is very rare to have a waterfront home in this market. This could make it very valuable in terms of the price of the home.
 
 ```{r}
 groupcdata$waterfront=as.factor(groupcdata$waterfront)
