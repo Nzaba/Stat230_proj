@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 require(readr)
+require(mosaic)
 groupcdata <- read_csv("https://awagaman.people.amherst.edu/stat230/projectsS18/groupCdataS18.csv")
 
 ```
@@ -50,6 +51,31 @@ groupcdata<-groupcdata %>%
   separate(date, c("Year","Month", "Date"), sep = "-",extra="merge") 
 
 ```
+```{r}
+fav_stats(groupcdata$price)
+densityplot(groupcdata$price)
+```
+
+The average price of a home in this market is $540,000 although this number is likely subject to outliers as shown by the density plot. Accordingly, the median is a lower value of $450,000.
+
+```{r}
+histogram(groupcdata$condition)
+histogram(groupcdata$floors)
+
+```
+The majority of houses in this market only have one floor and it is very rare to have more than 2 floors. Furthermore, the majority of the homes are in above average condition as most homes are graded at a 3 or above. 
+
+```{r}
+favstats(groupcdata$sqft_lot)
+densityplot(groupcdata$sqft_lot)
+```
+The values for sqft in this market is extremely distorted by outliers. The mean value is over 15,000 square feet while the median is roughly half of the mean. This will be important to consider as we continue our analysis.
+
+```{r}
+tally(groupcdata$waterfront)
+```
+It is very rare to have a waterfront home in this market. This could make it very valuable in terms of the price of the home.
+
 **Prelim Bivariate Analysis**
 
 **Randomization-Bsaed Procedure Thoughts**
