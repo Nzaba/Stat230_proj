@@ -19,8 +19,15 @@ groupcdata <- read_csv("https://awagaman.people.amherst.edu/stat230/projectsS18/
 
 **Summary command on the data set**
 
+## Put data in right format.
 ```{r}
 summary(groupcdata)
+#Change Year, Month and Date to right format
+sales<-groupcdata %>% 
+  mutate(condition=as.factor(condition),id=1:n(),Year=as.factor(parse_number(Year)),Month=as.factor(parse_number(Month)),Date=as.factor(parse_number(Date)),waterfront=as.factor(waterfront),zipcode=as.factor(zipcode)) %>% 
+  rename(Day=Date) 
+
+
 ```
 
 **Data Codebook**
