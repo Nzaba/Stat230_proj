@@ -1,6 +1,6 @@
 ---
 title: "PrelimProjectLookGroupC"
-author: "Sam Schneider"
+author: "Sam Schneider, Raymond Saitoti, Brian Burrows"
 date: "4/9/2018"
 output: html_document
 ---
@@ -28,23 +28,100 @@ summary(groupcdata)
 
 Our variables are: 
 
-Bedrooms - The number of bedrooms in the house (numeric)   
-Bathrooms - The number of bathrooms in the house (numeric)   
-sqft_lot - The total square footage of the property (numeric)  
-floors - The number of floors in the house (numeric)  
+bedrooms - The number of bedrooms in the house (numeric: 0-33)   
+bathrooms - The number of bathrooms in the house (numeric: 0-8)   
+sqft_lot - The total square footage of the property (numeric: 520-1651359)  
+floors - The number of floors in the house (numeric: 1-3.5)  
 waterfront - Indicator if the house has a waterfront view (categorical)  
 condition - The overall condition of the house based upon the King County grading system (categorical)  
-yr_built - The year in which the house was built (numeric)
-zipcode = The ZIP code in which the house is located (categorical)
+yr_built - The year in which the house was built (numeric: 5/2/14 - 5/27/15)
+zipcode - The ZIP code in which the house is located (categorical)
+price - The price a house was sold for (numeric: 75000-7700000)
+
 
 **Analysis Plan**  
 
-1.	How much does the location of the home determine the value of that home? (Response Variable = Price , Explanatory Variable(s)= ZIP Code)
-2.	How much does having a waterfront view affect the impact of home location in determining home value?(Response Variable = Price , Explanatory Variable(s)= ZIP Code, Waterfront View, interaction term - ZIP Code : Waterfront View)
-3.	Is the square footage of a house a better predictor of home value than the number of bedrooms?(Response Variable = Price, Explanatory Variable(s)= Square Footage, Bedrooms)
+As stated in the proposal, we aim to create a model that can predict home values in King County, using 2014 and 2015 sales data. In addition, we will examine the following additional questions:
+
+1. How much does the location of the home determine the value of that home? (Response Variable = Price , Explanatory Variable(s)= ZIP Code)
+2. How much does having a waterfront view affect the impact of home location in determining home value?(Response Variable = Price , Explanatory Variable(s)= ZIP Code, Waterfront View, interaction term - ZIP Code : Waterfront View)
+3. Is the square footage of a house a better predictor of home value than the number of bedrooms?(Response Variable = Price, Explanatory Variable(s)= Square Footage, Bedrooms)
 
 **Prelim Univariate Analysis**
 
+```{r}
+groupcdata$waterfront=as.factor(groupcdata$waterfront)
+groupcdata$condition=as.factor(groupcdata$condition)
+groupcdata$zipcode=as.factor(groupcdata$zipcode)
+```
+
 **Prelim Bivariate Analysis**
 
-**Randomization-Bsaed Procedure Thoughts**
+We begin with simple analyses of the relationships price has with each of our predictors to see if transformations are necessary.
+
+
+First is price and bedrooms.
+
+```{r}
+xyplot(price~bedrooms, main="House Price vs. Number of Bedrooms", data=groupcdata)
+with(groupcdata, cor(price,bedrooms))
+```
+
+
+Second is price and bathrooms.
+
+```{r}
+xyplot(price~bathrooms, main="House Price vs. Number of Bathrooms", data=groupcdata)
+with(groupcdata, cor(price,bathrooms))
+```
+
+
+Third is price and square footage.
+
+```{r}
+xyplot(price~sqft_lot, main="House Price vs. Square Footage", data=groupcdata)
+with(groupcdata, cor(price,sqft_lot))
+```
+
+
+Fourth is price and floors.
+
+```{r}
+xyplot(price~floors, main="House Price vs. Number of Floors", data=groupcdata)
+with(groupcdata, cor(price,floors))
+```
+
+
+Fifth is price and waterfront.
+
+```{r}
+bwplot(price~waterfront, main="House Price vs Waterfront View", data=groupcdata)
+```
+
+
+Sixth is price and condition.
+
+```{r}
+bwplot(price~condition, main="House Price vs Home Condition", data=groupcdata)
+```
+
+
+Seventh is price and year built.
+
+```{r}
+xyplot(price~yr_built, main="House Price vs Year Built", data=groupcdata)
+with(groupcdata, cor(price, yr_built))
+```
+
+
+Last is price and zipcode.
+
+```{r}
+bwplot(price~zipcode, main="House Price vs Zipcode", data=groupcdata)
+```
+
+
+
+**Randomization-Based Procedure Thoughts**
+
+
