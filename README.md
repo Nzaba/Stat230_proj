@@ -1,6 +1,6 @@
-# Stat230_proj
+# Stat230 project
 
-Overview
+## Overview
 In groups of two or three students, you will conduct a statistical analysis on a data set to
 address a research question of your choice. Group choice will be up to you. This task will
 require you to write a project proposal, acquire and analyze relevant data, then present your
