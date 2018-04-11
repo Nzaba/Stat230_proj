@@ -45,9 +45,6 @@ zipcode = The ZIP code in which the house is located (categorical)
 
 **Prelim Univariate Analysis**
 ```{r}
-library(dplyr)
-groupcdata<-groupcdata %>% 
-  separate(date, c("Year","Month", "Date"), sep = "-",extra="merge") 
 
 ```
 **Prelim Bivariate Analysis**
