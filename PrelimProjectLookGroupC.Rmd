@@ -161,3 +161,24 @@ We suspect that our price vs square footage plot might need a log transformation
 
 3. We might have too many zip codes than we anticipated.
 
+```{r}
+library(ggmap)
+library(mapproj)
+
+sales<-sales %>%
+  mutate(zipcode=as.numeric(zipcode)) %>% 
+  filter(zipcode=="98103"||zipcode=="98038"||zipcode=="98115"||zipcode=="98052"||zipcode=="98117")
+map <- get_map(location = 'Seattle')
+ggmap(map) +
+  geom_point(data = sales, aes(x = long, y = lat),  shape = 20, alpha = 0.4) +
+  labs(x="Longitude", y="Latitude")+ 
+    scale_size(range = c(3, 8))
+```
+
+
+
+```{r}
+
+
+  
+```
