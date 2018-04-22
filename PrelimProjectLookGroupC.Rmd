@@ -65,7 +65,7 @@ fav_stats(sales$price)
 densityplot(sales$price)
 ```
 
-The average price of a home in this market is $540,000 although this number is likely subject to outliers as shown by the density plot. Accordingly, the median is a lower value of $450,000.
+The average price of a home in this market is $557,996 although this number is likely subject to outliers as shown by the density plot. Accordingly, the median is a lower value of $525,000.
 
 ```{r}
 histogram(sales$condition)
@@ -79,7 +79,7 @@ favstats(sales$sqft_lot)
 densityplot(sales$sqft_lot)
 ```
 
-The values for sqft in this market is extremely distorted by outliers. The mean value is over 15,000 square feet while the median is roughly half of the mean. This will be an important factor to consider as we continue our analysis.
+The values for sqft in this market is extremely distorted by outliers. The mean value is roughly 10,000 square feet while the median is roughly half of the mean. This will be an important factor to consider as we continue our analysis.
 
 ```{r}
 tally(sales$waterfront)
@@ -150,9 +150,10 @@ bwplot(price~zipcode, main="House Price vs Zipcode", data=sales)
 ```
 
 
-Boxplots of price by zip-code seem to indicate differences in house price by zip-code. An ANOVA will be run to see if any of the differences are significant. Also, for the sake of legibility, we might consider renaming the zip-codes, which should help to make the horizontal axis more readible.
+Boxplots of price by zip-code seem to indicate differences in house price by zip-code. An ANOVA will be run to see if any of the differences are significant. It also seems like there are alot of outliers for each of the zipcodes.
 
 **Randomization-Based Procedure thoughts**
+
 We suspect that our price vs square footage plot might need a log transformation. However, we would like to see whether the results we see after fixing the conditions would be compatible with those obtained using a randomization test for the slope. The variable we would be shuffling in this context would be the square footage
 
 ### Results after a log transformation:
