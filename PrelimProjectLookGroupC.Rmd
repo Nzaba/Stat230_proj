@@ -152,33 +152,6 @@ bwplot(price~zipcode, main="House Price vs Zipcode", data=sales)
 
 Boxplots of price by zip-code seem to indicate differences in house price by zip-code. An ANOVA will be run to see if any of the differences are significant. It also seems like there are alot of outliers for each of the zipcodes.
 
-**Randomization-Based Procedure thoughts**
-
-We suspect that our price vs square footage plot might need a log transformation. However, we would like to see whether the results we see after fixing the conditions would be compatible with those obtained using a randomization test for the slope. The variable we would be shuffling in this context would be the square footage
-
-### Results after a log transformation:
-```{r}
-xyplot(price~log(sqft_lot), main="House Price vs. Square Footage", data=sales)
-with(sales, cor(price,sqft_lot))
-fm<-lm(price~log(sqft_lot),data=sales)
-plot(fm,which=1)
-plot(fm,which=2)
-```
-
-After a log transformation, it is clear that some of the conditions for the linear model still haven't been met. There is still a problem with the normality condition as can be seen on the upper and lower tail of the qq plot. Additionally, the distribution of error terms seems to vary across fitted values. We shall run the randomization test below to test the significance of the relationship between price and square footage.
-
-```{r}
-t<-do(1000)*(cor(shuffle(sales$sqft_lot),sales$price))
-hist(t$result)
-with(sales, cor(price,sqft_lot))
-savecor<-t$result
-pdata(savecor,.036,lower.tail=FALSE) 
-qdata(savecor, c(0.025, 0.975))
-```
-
-The observed correlation is 0.036. We use the randomization test and shuffle up the square footage, obtaining
-1000 correlations. The resulting distribution of correlations shows that 0.036 falls within the constructed interval after destroying the relationship between price and square footage, which suggests that the correlation between these two variables is not signifiantly greater than zero (House price is unrelated to square footage). 
-
 
 ## Spatial analysis of house concentration in the five most popular zipcodes:
 
@@ -258,5 +231,67 @@ ggmap(map) +
   labs(x="Longitude", y="Latitude")+ 
     scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98117 ZIP code") + scale_alpha_continuous(guide = FALSE)
 ```
+
+## Models
+
+**Randomization-Based Procedure thoughts**
+
+We suspect that our price vs square footage plot might need a log transformation. However, we would like to see whether the results we see after fixing the conditions would be compatible with those obtained using a randomization test for the slope. The variable we would be shuffling in this context would be the square footage
+
+### Results after a log transformation:
+```{r}
+xyplot(price~log(sqft_lot), main="House Price vs. Square Footage", data=sales)
+with(sales, cor(price,sqft_lot))
+fm<-lm(price~log(sqft_lot),data=sales)
+plot(fm,which=1)
+plot(fm,which=2)
+```
+
+After a log transformation, it is clear that some of the conditions for the linear model still haven't been met. There is still a problem with the normality condition as can be seen on the upper and lower tail of the qq plot. Additionally, the distribution of error terms seems to vary across fitted values. We shall run the randomization test below to test the significance of the relationship between price and square footage.
+
+```{r}
+t<-do(1000)*(cor(shuffle(sales$sqft_lot),sales$price))
+hist(t$result)
+with(sales, cor(price,sqft_lot))
+savecor<-t$result
+pdata(savecor,.036,lower.tail=FALSE) 
+qdata(savecor, c(0.025, 0.975))
+```
+
+The observed correlation is 0.036. We use the randomization test and shuffle up the square footage, obtaining
+1000 correlations. The resulting distribution of correlations shows that 0.036 falls within the constructed interval after destroying the relationship between price and square footage, which suggests that the correlation between these two variables is not signifiantly greater than zero (House price is unrelated to square footage). 
+
+## Anova analysis to compare how much the location of a home determined its value
+
+### One way.
+```{r}
+modl<-lm(log(price)~zipcode,data=sales)
+anova(modl)
+plot(modl,which=1)
+plot(modl,which=2)
+```
+
+Conditions:
+There are a few outliers on the upper and lower tails of the qqplot. Constant variance is satisfied as can be seen in the residuals vs fitted plot
+
+the F-statistic of 309.8 and its associated p-value of 2.2e-16 provide evidence that there is at least one difference between the zipcodes in terms of average price. 
+
+** Should we do a pairwise comparisons to see where these differences lie? **
+
+```{r}
+#Fishers LSD
+library(scmamp)
+require(mosaic)
+PostHocTest(aov(log(price)~zipcode,data=sales), method = "lsd")
+```
+
+### Two way
+
+```{r}
+#Two way modes + interaction
+modl2<-lm(log(price)~zipcode+waterfront,data=sales)
+anova(modl1)
+plot(modl2,which=1)
+plot(modl2,which=2)
 ```
 
