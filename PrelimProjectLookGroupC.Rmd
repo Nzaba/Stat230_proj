@@ -48,6 +48,7 @@ condition - The overall condition of the house based upon the King County gradin
 yr_built - The year in which the house was built (numeric: 5/2/14 - 5/27/15)
 zipcode - The ZIP code in which the house is located (categorical)
 price - The price a house was sold for (numeric: 75000-7700000)
+sqft_living - The total square footage of the house (numeric: 370-5770)
 
 
 **Analysis Plan**  
@@ -108,7 +109,7 @@ with(sales, cor(price,bathrooms))
 
 The graph indicates a moderate positive relationship between price and number of bathrooms. However, it is worthwhile noting that there are far fewer observations for houses with five or more bathrooms. This might limit the scope to which we may predictions out of fear of extrapolation beyond the data.
 
-Third is price and square footage.
+Third is price and lot square footage.
 
 ```{r}
 xyplot(price~sqft_lot, main="House Price vs. Square Footage", data=sales)
@@ -116,6 +117,14 @@ with(sales, cor(price,sqft_lot))
 ```
 
 The graph of house price and square footage indicates that transformations will most likely be required. Furthermore, very few observations exist for homes of more than 500,000 square feet. In addition, a correlation test indicates that price and square footage is very weakly positively correlated, which is expectated but not readily shown by the graph. 
+
+```{r}
+xyplot(price~log(sqft_lot), main="House Price vs. Square Footage", data=sales)
+#This transformation that I think looks best. However, the data does not exhibit much of a linear relationship and might not be worth using in the final model. 
+with(sales, cor(price,log(sqft_lot)))
+```
+
+A log transformation of lot square footage improves the legibility of the graph and strengthens the correlation between square footage and house price.
 
 Fourth is price and floors.
 
@@ -143,7 +152,7 @@ bwplot(price~condition, main="House Price vs Home Condition", xlab=" Home Condit
 The side-by-side boxplots of price by house condition shows fairly similar medians for each home condition group. Interestingly, there are a number of outliers for homes with conditions rated three or higher. This might be explained by location or age data in additional analysis. Also, an ANOVA will be run to see if the differences in house price between condition groups is significant.
 
 
-Last is price and zipcode.
+Seventh is price and zipcode.
 
 ```{r}
 bwplot(price~zipcode, main="House Price vs Zipcode", data=sales)
@@ -152,6 +161,14 @@ bwplot(price~zipcode, main="House Price vs Zipcode", data=sales)
 
 Boxplots of price by zip-code seem to indicate differences in house price by zip-code. An ANOVA will be run to see if any of the differences are significant. It also seems like there are alot of outliers for each of the zipcodes.
 
+Last is price vs. house/living square footage
+
+```{r}
+xyplot(price~sqft_living, data=sales)
+with(sales, cor(price,sqft_living))
+```
+
+The scatterplot of price and house square footage shows a weak to moderate positive linear correlation. The correlation coefficient is approximately 0.61, which is moderately strong. 
 
 ## Spatial analysis of house concentration in the five most popular zipcodes:
 
@@ -285,6 +302,14 @@ require(mosaic)
 PostHocTest(aov(log(price)~zipcode,data=sales), method = "lsd")
 ```
 
+** Instead of Fishers LSD, I suggest using either Tukey HSD or Bonferroni, as they are more conservative tests. **
+
+```{r}
+TukeyHSD(modl)
+```
+
+The results of Tukey's HSD indicate that significant differences in home values exist between all zipcodes except the 98117 and 98103 area codes. 
+
 ### Two way
 
 ```{r}
@@ -295,3 +320,11 @@ plot(modl2,which=1)
 plot(modl2,which=2)
 ```
 
+## Stepwise Regression Model
+
+```{r}
+modall <- lm(price~bedrooms+bathrooms+sqft_lot+log(sqft_lot)+floors+waterfront+condition+yr_built+zipcode+sqft_living, data=sales)
+summary(modall)
+plot(modall,which=1)
+plot(modall,which=2)
+```
