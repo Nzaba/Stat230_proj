@@ -175,18 +175,19 @@ The scatterplot of price and house square footage shows a weak to moderate posit
 ```{r}
 library(ggmap)
 library(mapproj)
-
+#Heatmap showing where the sales are happening across all ZIP codes, use this to show why we are focusing on the 5 zip codes
 map <- get_map(location = 'Seattle')
-ggmap(map) +
-  geom_point(data = sales, aes(x = long, y = lat, color = zipcode, alpha = price)) +
-  labs(x="Longitude", y="Latitude")+ 
-    scale_size(range = c(3, 8)) + ggtitle("Sale Price of Homes in King County") + scale_alpha_continuous(guide = FALSE)
+ggmap(map, extent = "device") + geom_density2d(data = groupcdata, aes(x = long, y = lat)) + stat_density2d(data = groupcdata, aes(x = long, y = lat, fill = ..level.., alpha = ..level..), size = .01, bins = 16, geom = "polygon") + scale_fill_gradient(low = "yellow", high = "red") +scale_alpha_continuous(guide = FALSE) + ggtitle("Where Sales Are Happening in King County")
 ```
 
 ```{r}
-#Heatmap showing where the sales are happening across all ZIP codes, use this to show why we are focusing on the 5 zip codes
-ggmap(map, extent = "device") + geom_density2d(data = groupcdata, aes(x = long, y = lat)) + stat_density2d(data = groupcdata, aes(x = long, y = lat, fill = ..level.., alpha = ..level..), size = .01, bins = 16, geom = "polygon") + scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +scale_alpha_continuous(guide = FALSE) + ggtitle("Where Sales Are Happening in King County")
+ggmap(map) +
+  geom_point(data = sales, aes(x = long, y = lat, color = zipcode, alpha = price)) +
+  labs(x="Longitude", y="Latitude")+ 
+    scale_size(range = c(3, 8)) + ggtitle("ZIP Codes with Most Sales in King County") + scale_alpha_continuous()
 ```
+
+
 
 Sale Prices in 98038 ZIP Code
 ```{r}
@@ -198,7 +199,7 @@ sales_98038 <- sales %>%
 ggmap(map) +
   geom_point(data = sales_98038, aes(x = long, y = lat, color = zipcode, alpha = price)) +
   labs(x="Longitude", y="Latitude")+ 
-    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98038 ZIP code") + scale_alpha_continuous(guide = FALSE)
+    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98038 ZIP code") + scale_alpha_continuous()
 ```
 
 Sale Prices in 98103 ZIP Code
@@ -210,7 +211,7 @@ sales_98103 <- sales %>%
 ggmap(map) +
   geom_point(data = sales_98103, aes(x = long, y = lat, color = zipcode, alpha = price)) +
   labs(x="Longitude", y="Latitude")+ 
-    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98103 ZIP code") + scale_alpha_continuous(guide = FALSE)
+    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98103 ZIP code") + scale_alpha_continuous()
 ```
 
 Sale Prices in 98052 ZIP Code
@@ -222,7 +223,7 @@ sales_98052 <- sales %>%
 ggmap(map) +
   geom_point(data = sales_98052, aes(x = long, y = lat, color = zipcode, alpha = price)) +
   labs(x="Longitude", y="Latitude")+ 
-    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98052 ZIP code") + scale_alpha_continuous(guide = FALSE)
+    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98052 ZIP code") + scale_alpha_continuous()
 ```
 
 Sale Prices in 98115 ZIP Code
@@ -234,7 +235,7 @@ sales_98115 <- sales %>%
 ggmap(map) +
   geom_point(data = sales_98115, aes(x = long, y = lat, color = zipcode, alpha = price)) +
   labs(x="Longitude", y="Latitude")+ 
-    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98115 ZIP code") + scale_alpha_continuous(guide = FALSE)
+    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98115 ZIP code") + scale_alpha_continuous()
 ```
 
 Sale Prices in 98117 ZIP Code
@@ -246,7 +247,7 @@ sales_98117 <- sales %>%
 ggmap(map) +
   geom_point(data = sales_98117, aes(x = long, y = lat, color = zipcode, alpha = price)) +
   labs(x="Longitude", y="Latitude")+ 
-    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98117 ZIP code") + scale_alpha_continuous(guide = FALSE)
+    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98117 ZIP code") + scale_alpha_continuous()
 ```
 
 ## Models
@@ -328,3 +329,7 @@ summary(modall)
 plot(modall,which=1)
 plot(modall,which=2)
 ```
+
+
+
+
