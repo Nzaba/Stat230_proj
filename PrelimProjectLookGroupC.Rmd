@@ -3,6 +3,7 @@ title: "PrelimProjectLookGroupC"
 author: "Sam Schneider, Raymond Saitoti, Brian Burrows"
 date: "4/9/2018"
 output:
+  word_document: default
   pdf_document: default
   html_document: default
 ---
@@ -275,9 +276,6 @@ pdata(savecor,.036,lower.tail=FALSE)
 qdata(savecor, c(0.025, 0.975))
 ```
 
-The observed correlation is 0.036. We use the randomization test and shuffle up the square footage, obtaining
-1000 correlations. The resulting distribution of correlations shows that 0.036 falls within the constructed interval after destroying the relationship between price and square footage, which suggests that the correlation between these two variables is not signifiantly greater than zero (House price is unrelated to square footage). 
-
 ## Anova analysis to compare how much the location of a home determined its value
 
 ### One way.
@@ -316,12 +314,15 @@ plot(modl2,which=2)
 ## Stepwise Regression Model
 
 ```{r}
-modall <- lm(price~bedrooms+bathrooms+sqft_lot+log(sqft_lot)+floors+waterfront+condition+yr_built+zipcode+sqft_living, data=sales)
+modall <- lm(log(price)~bedrooms+bathrooms+sqft_lot+log(sqft_lot)+floors+waterfront+condition+yr_built+zipcode+sqft_living, data=sales)
 summary(modall)
 plot(modall,which=1)
 plot(modall,which=2)
 ```
 
+## Results
+
+The observed correlation between squate footage and price is 0.036. After using a randomization test and shuffle up the square footage, 1000 correlations are obtained. Their resulting distribution shows that 0.036 falls within the constructed interval after destroying the relationship between price and square footage, which suggests that the correlation between these two variables is not significantly greater than zero (House price is unrelated to square footage). The one way ANOVA ran showed that there existed at least one difference in average house prices between the zipcodes analyzed. The multiple comparisons ran between average house prices in different zipcodes revealed that significant differences exist between every pairwise combination of zipcodes except 98117(Loyal Heights/Ballard neighborhood) and 98103(Fremont/WallingFord neighborhood). The test for interaction between zipcode and waterfront yields a high p value (0.269) which shows that the interaction term is insignificant  after zipcode and waterfront have been accounted for.
 
 
 
