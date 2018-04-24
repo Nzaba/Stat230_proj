@@ -3,6 +3,7 @@ title: "PrelimProjectLookGroupC"
 author: "Sam Schneider, Raymond Saitoti, Brian Burrows"
 date: "4/9/2018"
 output:
+  word_document: default
   pdf_document: default
   html_document: default
 ---
@@ -177,18 +178,19 @@ The scatterplot of price and house square footage shows a weak to moderate posit
 ```{r}
 library(ggmap)
 library(mapproj)
-
+#Heatmap showing where the sales are happening across all ZIP codes, use this to show why we are focusing on the 5 zip codes
 map <- get_map(location = 'Seattle')
-ggmap(map) +
-  geom_point(data = sales, aes(x = long, y = lat, color = zipcode, alpha = price)) +
-  labs(x="Longitude", y="Latitude")+ 
-    scale_size(range = c(3, 8)) + ggtitle("Sale Price of Homes in King County") + scale_alpha_continuous(guide = FALSE)
+ggmap(map, extent = "device") + geom_density2d(data = groupcdata, aes(x = long, y = lat)) + stat_density2d(data = groupcdata, aes(x = long, y = lat, fill = ..level.., alpha = ..level..), size = .01, bins = 16, geom = "polygon") + scale_fill_gradient(low = "yellow", high = "red") +scale_alpha_continuous(guide = FALSE) + ggtitle("Where Sales Are Happening in King County")
 ```
 
 ```{r}
-#Heatmap showing where the sales are happening across all ZIP codes, use this to show why we are focusing on the 5 zip codes
-ggmap(map, extent = "device") + geom_density2d(data = groupcdata, aes(x = long, y = lat)) + stat_density2d(data = groupcdata, aes(x = long, y = lat, fill = ..level.., alpha = ..level..), size = .01, bins = 16, geom = "polygon") + scale_fill_gradient(low = "yellow", high = "red", guide = FALSE) +scale_alpha_continuous(guide = FALSE) + ggtitle("Where Sales Are Happening in King County")
+ggmap(map) +
+  geom_point(data = sales, aes(x = long, y = lat, color = zipcode, alpha = price)) +
+  labs(x="Longitude", y="Latitude")+ 
+    scale_size(range = c(3, 8)) + ggtitle("ZIP Codes with Most Sales in King County") + scale_alpha_continuous()
 ```
+
+
 
 Sale Prices in 98038 ZIP Code
 ```{r}
@@ -200,7 +202,7 @@ sales_98038 <- sales %>%
 ggmap(map) +
   geom_point(data = sales_98038, aes(x = long, y = lat, color = zipcode, alpha = price)) +
   labs(x="Longitude", y="Latitude")+ 
-    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98038 ZIP code") + scale_alpha_continuous(guide = FALSE)
+    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98038 ZIP code") + scale_alpha_continuous()
 ```
 
 Sale Prices in 98103 ZIP Code
@@ -212,7 +214,7 @@ sales_98103 <- sales %>%
 ggmap(map) +
   geom_point(data = sales_98103, aes(x = long, y = lat, color = zipcode, alpha = price)) +
   labs(x="Longitude", y="Latitude")+ 
-    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98103 ZIP code") + scale_alpha_continuous(guide = FALSE)
+    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98103 ZIP code") + scale_alpha_continuous()
 ```
 
 Sale Prices in 98052 ZIP Code
@@ -224,7 +226,7 @@ sales_98052 <- sales %>%
 ggmap(map) +
   geom_point(data = sales_98052, aes(x = long, y = lat, color = zipcode, alpha = price)) +
   labs(x="Longitude", y="Latitude")+ 
-    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98052 ZIP code") + scale_alpha_continuous(guide = FALSE)
+    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98052 ZIP code") + scale_alpha_continuous()
 ```
 
 Sale Prices in 98115 ZIP Code
@@ -236,7 +238,7 @@ sales_98115 <- sales %>%
 ggmap(map) +
   geom_point(data = sales_98115, aes(x = long, y = lat, color = zipcode, alpha = price)) +
   labs(x="Longitude", y="Latitude")+ 
-    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98115 ZIP code") + scale_alpha_continuous(guide = FALSE)
+    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98115 ZIP code") + scale_alpha_continuous()
 ```
 
 Sale Prices in 98117 ZIP Code
@@ -248,25 +250,24 @@ sales_98117 <- sales %>%
 ggmap(map) +
   geom_point(data = sales_98117, aes(x = long, y = lat, color = zipcode, alpha = price)) +
   labs(x="Longitude", y="Latitude")+ 
-    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98117 ZIP code") + scale_alpha_continuous(guide = FALSE)
+    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98117 ZIP code") + scale_alpha_continuous()
 ```
 
 ## Models
 
-**Randomization-Based Procedure thoughts**
+## **Randomization-Based Procedure**
 
 We suspect that our price vs square footage plot might need a log transformation. However, we would like to see whether the results we see after fixing the conditions would be compatible with those obtained using a randomization test for the slope. The variable we would be shuffling in this context would be the square footage
 
-### Results after a log transformation:
 ```{r}
-xyplot(price~log(sqft_lot), main="House Price vs. Square Footage", data=sales)
+xyplot(log(price)~sqft_lot, main="House Price vs. Square Footage", data=sales)
 with(sales, cor(price,sqft_lot))
-fm<-lm(price~log(sqft_lot),data=sales)
+fm<-lm(log(price)~sqft_lot,data=sales)
 plot(fm,which=1)
 plot(fm,which=2)
 ```
 
-After a log transformation, it is clear that some of the conditions for the linear model still haven't been met. There is still a problem with the normality condition as can be seen on the upper and lower tail of the qq plot. Additionally, the distribution of error terms seems to vary across fitted values. We shall run the randomization test below to test the significance of the relationship between price and square footage.
+After doing a log transformation on price, it is clear that some of the conditions for the linear model still haven't been met. There is still a problem with the distribution of error terms as seen in the variation across the fitted values. Thus, we shall run the randomization test below to test the significance of the relationship between price and square footage.
 
 ```{r}
 t<-do(1000)*(cor(shuffle(sales$sqft_lot),sales$price))
@@ -276,9 +277,6 @@ savecor<-t$result
 pdata(savecor,.036,lower.tail=FALSE) 
 qdata(savecor, c(0.025, 0.975))
 ```
-
-The observed correlation is 0.036. We use the randomization test and shuffle up the square footage, obtaining
-1000 correlations. The resulting distribution of correlations shows that 0.036 falls within the constructed interval after destroying the relationship between price and square footage, which suggests that the correlation between these two variables is not signifiantly greater than zero (House price is unrelated to square footage). 
 
 ## Anova analysis to compare how much the location of a home determined its value
 
@@ -295,56 +293,53 @@ There are a few outliers on the upper and lower tails of the qqplot. Constant va
 
 the F-statistic of 309.8 and its associated p-value of 2.2e-16 provide evidence that there is at least one difference between the zipcodes in terms of average price. 
 
-** Should we do a pairwise comparisons to see where these differences lie? **
+**Pairwise comparisons showing where differences lie **
 
 ```{r}
-#Fishers LSD
-library(scmamp)
-require(mosaic)
-PostHocTest(aov(log(price)~zipcode,data=sales), method = "lsd")
+#Tukeys LSD
+require(DescTools)
+PostHocTest(aov(log(price)~zipcode,data=sales), method = "hsd")
 ```
 
-** Instead of Fishers LSD, I suggest using either Tukey HSD or Bonferroni, as they are more conservative tests. **
-
-```{r}
-TukeyHSD(modl)
-```
-
-The results of Tukey's HSD indicate that significant differences in home values exist between all zipcodes except the 98117 and 98103 area codes. 
-
-### Two way
+### Two way ANOVA
 
 ```{r}
 #Two way modes + interaction
+sales<-sales %>% 
+  mutate(zipcode=factor(zipcode))
 modl2<-lm(log(price)~zipcode+waterfront,data=sales)
-anova(modl1)
+anova(modl)
 plot(modl2,which=1)
 plot(modl2,which=2)
 ```
+
+=======
+## Results
+
+**Results**
+The observed correlation between square footage and price is 0.036. After using a randomization test to shuffle up the square footage, 1000 correlations are obtained. Their resulting distribution shows that 0.036 falls within the constructed interval after destroying the relationship between price and square footage, which suggests that the correlation between these two variables is not significantly greater than zero (House price is unrelated to square footage). The one way ANOVA ran showed that there existed at least one difference in average house prices between the zipcodes analyzed. The multiple comparisons ran between average house prices in different zipcodes revealed that significant differences exist between every pairwise combination of zipcodes except 98117(Loyal Heights/Ballard neighborhood) and 98103(Fremont/WallingFord neighborhood). The test for interaction between zipcode and waterfront yields a high p value (0.269) which shows that the interaction term is insignificant  after zipcode and waterfront have been accounted for.
 
 ## Stepwise Regression Model
 
 ** Kitchen sink approach **
 
 ```{r}
-modall <- lm(price~bedrooms+bathrooms+sqft_lot+log(sqft_lot)+floors+waterfront+condition+yr_built+zipcode+sqft_living, data=sales)
+modall <- lm(log(price)~bedrooms+bathrooms+sqft_lot+log(sqft_lot)+floors+waterfront+condition+yr_built+zipcode+sqft_living, data=sales)
 summary(modall)
 plot(modall,which=1)
 plot(modall,which=2)
 vif(modall)
 ```
 
+Our first step toward building a model was taking the kitchen sink approach, throwing all of our predictors in the model, and performing a log transformation on the response. The model yielded a high adjusted R-squared of 0.7536, and although the constant variance and normality assumptions were not exactly met, they were not horrible either.
+
 ** Stepwise Regression **
 
 ```{r}
 stepAIC(modall,scope=list(upper=modall, lower=~1), direction="both",trace=FALSE)$anova
-modStep <- lm(log(price)~bedrooms+bathrooms+sqft_lot+log(sqft_lot)+floors+waterfront+condition+zipcode+sqft_living, data=sales)
+modStep <- lm(log(price)~bathrooms+log(sqft_lot)+floors+waterfront+condition+yr_built+zipcode+sqft_living, data=sales)
 summary(modStep)
-plot(modStep, which=1)
-plot(modStep, which=2)
-plot(modStep, which=3)
-plot(modStep, which=4)
-plot(modStep, which=5)
+plot(modStep)
 ```
 
-
+We then used automated regression techniques to produce a final model that was pared down using stepwise regression. What resulted was a model that was extremely similar to the initial model, with the predictors bedrooms and sqft_lot being removed. In addition, the increase in R-squared from the initial model to the stepwise-produced model was 0.0001. Once again, there are concerns with the constant variance (eventual decreasing spread) and normality assumptions (curvature in the tails). Transformations of the response, outside of logs, do little to approve the plots and in many cases make them worse. Still, the plots do not look great, but they do not look terrible either.
