@@ -18,6 +18,8 @@ knitr::opts_chunk$set(
 ```{r}
 require(readr)
 require(mosaic)
+require(MASS)
+require(car)
 groupcdata <- read_csv("https://awagaman.people.amherst.edu/stat230/projectsS18/groupCdataS18.csv")
 
 ```
@@ -322,9 +324,27 @@ plot(modl2,which=2)
 
 ## Stepwise Regression Model
 
+** Kitchen sink approach **
+
 ```{r}
 modall <- lm(price~bedrooms+bathrooms+sqft_lot+log(sqft_lot)+floors+waterfront+condition+yr_built+zipcode+sqft_living, data=sales)
 summary(modall)
 plot(modall,which=1)
 plot(modall,which=2)
+vif(modall)
 ```
+
+** Stepwise Regression **
+
+```{r}
+stepAIC(modall,scope=list(upper=modall, lower=~1), direction="both",trace=FALSE)$anova
+modStep <- lm(log(price)~bedrooms+bathrooms+sqft_lot+log(sqft_lot)+floors+waterfront+condition+zipcode+sqft_living, data=sales)
+summary(modStep)
+plot(modStep, which=1)
+plot(modStep, which=2)
+plot(modStep, which=3)
+plot(modStep, which=4)
+plot(modStep, which=5)
+```
+
+
