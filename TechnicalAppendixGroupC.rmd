@@ -1,11 +1,11 @@
 ---
-title: "TechnicalAppendixGroupC"
+title: "Models and results"
 author: "Sam Schneider, Raymond Saitoti, Brian Burrows"
 date: "5/2/2018"
 output:
-  word_document: default
   pdf_document: default
   html_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -64,12 +64,14 @@ with(sales, cor(price,sqft_lot))
 
 Of all the bivariate relationships explored, the plot involving square footage of the property and price seemed to have an issue with linearity. The log transfromation below was explored to see whether this can be fixed:
 
+### Log transformation
+
 ```{r}
 xyplot(price~log(sqft_lot), main="House Price vs. Square Footage", data=sales)
 with(sales, cor(price,log(sqft_lot)))
 ```
 
-After a log transformation on the response, we noticed that the our two variables still didn't exhibit much of the linear relationship we hoped they would. However, it is worth noting that thos transformation slightly improves the correlation coefficent from 0.04 to 0.14. We proceeded on with this new found knowledge to see whether a simple linear regression would be feasible but first, we had to check whether other conditions were satisfied after the transformation:
+After a log transformation on the response, we noticed that the our two variables still didn't exhibit much of the linear relationship we hoped they would. However, it is worth noting that this transformation slightly improves the correlation coefficent from 0.04 to 0.14. We proceeded on with this new found knowledge to see whether a simple linear regression would be feasible but first, we had to check whether other conditions were satisfied after the transformation:
 
 ```{r}
 xyplot(price~log(sqft_lot), main="House Price vs. Square Footage", data=sales)
@@ -84,23 +86,88 @@ Constant variance and and normality of error terms wasn't achieved as can be see
 ## Randomization test
 
 ```{r}
-t<-do(1000)*(cor(shuffle(sales$sqft_lot),sales$price))
-hist(t$result)
-with(sales, cor(price,sqft_lot))
-savecor<-t$result
-pdata(savecor,.036,lower.tail=FALSE) 
-qdata(savecor, c(0.025, 0.975))
+#t<-do(1000)*(cor(shuffle(sales$sqft_lot),sales$price))
+#hist(t$result)
+#with(sales, cor(price,sqft_lot))
+#savecor<-t$result
+#pdata(savecor,.036,lower.tail=FALSE) 
+#qdata(savecor, c(0.025, 0.975))
 ```
-One way ANOVA: exploring conditions
+
+The resulting distribution from this test showed that 0.036 falls within the constructed interval after destroying the relationship between price and square footage, which suggests that the correlation between these two variables is not significantly greater than zero .
+
+## Other models explored:
 
 ```{r}
 bwplot(price~waterfront, main="House Price vs Waterfront View", xlab="Waterfront View", data=sales)
 ```
 
-Side by side boxplots of house price by waterfront view supports earlier univariate analysis as waterfront properties seem to have higher median price. Whether this difference is significant is something to be evaluated in a regression.
+Waterfront properties seem to have higher median price. Whether this difference is significant is something evaluated in the Multiple Linear Regression and two-way ANOVA.
 
-Two - Way ANOVA
 
 ```{r}
 bwplot(price~zipcode, main="House Price vs Zipcode", data=sales)
 ```
+
+Boxplots of price by zip-code seem to indicate differences in house price by zip-code. The one-way ANOVA ran below will be run to see if any of the differences are significant. It also seems like there are alot of outliers for each of the zipcodes.
+
+1. One way ANOVA analysis
+
+```{r}
+modl<-lm(log(price)~zipcode,data=sales)
+anova(modl)
+plot(modl,which=1)
+plot(modl,which=2)
+```
+
+There are a few outliers on the upper and lower tails of the qqplot. Constant variance is satisfied as can be seen in the residuals vs fitted plot. The F-statistic of 309.8 and its associated p-value of 2.2e-16 provide evidence that there is at least one difference between the zipcodes in terms of average price. 
+
+#### Pairwise comparisons between zipcodes:
+
+```{r}
+#Tukeys LSD
+require(DescTools)
+PostHocTest(aov(log(price)~zipcode,data=sales), method = "hsd")
+```
+
+From the output above, it can be seen that significant differences exist between every pairwise combination of zipcodes except 98117 and 98103.
+
+2. Two - way ANOVA analysis
+
+```{r}
+#Two way modes + interaction
+sales<-sales %>% 
+  mutate(zipcode=factor(zipcode))
+modl2<-lm(log(price)~zipcode+waterfront,data=sales)
+anova(modl)
+plot(modl2,which=1)
+plot(modl2,which=2)
+```
+
+After a log transformation on the price, we can see that the spread of error terms across fitted values seems to be constant. Additionally, the normality condition is satisfied as can be seen in the distribution of error terms in the QQ plot.
+
+The test for interaction between zipcode and waterfront yields a high p value (0.269) which shows that the interaction term is insignificant  after zipcode and waterfront have been accounted for.
+
+3. Multiple Linear Regression
+
+```{r}
+modall <- lm(log(price)~bedrooms+bathrooms+sqft_lot+log(sqft_lot)+floors+waterfront+condition+yr_built+zipcode+sqft_living, data=sales)
+#summary(modall)
+plot(modall,which=1)
+plot(modall,which=2)
+#vif(modall)
+```
+
+Throwing all of our predictors in the model and performing a log transformation on the response is the approach we took. The model yielded a high adjusted R-squared of 0.7536, and although the constant variance and normality assumptions were not exactly met, they were not horrible either.
+
+** Stepwise Regression **
+
+```{r}
+stepAIC(modall,scope=list(upper=modall, lower=~1), direction="both",trace=FALSE)$anova
+modStep <- lm(log(price)~bathrooms+log(sqft_lot)+floors+waterfront+condition+yr_built+zipcode+sqft_living, data=sales)
+#summary(modStep)
+plot(modStep)
+```
+
+What resulted was a model that was extremely similar to the initial model, with the predictors bedrooms and sqft_lot being removed. In addition, the increase in R-squared from the initial model to the stepwise-produced model was 0.0001. Once again, there are concerns with the constant variance (eventual decreasing spread) and normality assumptions (curvature in the tails). Transformations of the response, outside of logs, do little to approve the plots and in many cases make them worse. Still, the plots do not look great, but they do not look terrible either.
+
