@@ -1,13 +1,17 @@
 ---
 title: "Technical Appendix"
-author: "Sam Schneider, Ray Saitoti, and Brian Burrows, "
+author: 'Sam Schneider, Ray Saitoti, and Brian Burrows, '
 date: "5/2/2018"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+  tidy=FALSE,     # display code as typed
+  size="small",warning=FALSE, message=FALSE)
 ```
 
 
@@ -188,7 +192,7 @@ plot(fm,which=2)
 
 ####**Randomization-Based Procedure**
 
-Given that the log transformation was unsuccessful, we utilized a randomization test to examine the correlation between SQFT of the lot and price. The corresponding correlation coefficient was .036 with a 95% confidence interval between -0.035 and 0.041. As 0 falls within the 85% interval, we can conclude that there is no significant correlation between price and sqft. 
+Given that the log transformation was unsuccessful, we utilized a randomization test to examine the correlation between SQFT of the lot and price. The corresponding correlation coefficient was .036 with a 95% confidence interval between -0.035 and 0.041. As 0 falls within the 95% interval, we can conclude that there is no significant correlation between price and sqft. 
 
 ```{r}
 t<-do(1000)*(cor(shuffle(sales$sqft_lot),sales$price))
