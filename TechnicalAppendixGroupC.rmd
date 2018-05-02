@@ -1,0 +1,106 @@
+---
+title: "TechnicalAppendixGroupC"
+author: "Sam Schneider, Raymond Saitoti, Brian Burrows"
+date: "5/2/2018"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  tidy=FALSE,     # display code as typed
+  size="small", warning=FALSE, message=FALSE)
+```
+
+
+**Read in the data**
+
+```{r}
+library(dplyr)
+require(readr)
+require(mosaic)
+require(MASS)
+require(car)
+groupcdata <- read_csv("https://awagaman.people.amherst.edu/stat230/projectsS18/groupCdataS18.csv")
+```
+
+## Put data in right format.
+
+```{r}
+#Filter zipcodes of interest
+sales<-groupcdata %>% 
+  mutate(condition=as.factor(condition),id=1:n(),waterfront=as.factor(waterfront),zipcode=as.factor(zipcode)) %>% 
+  filter(zipcode %in% c("98103","98038","98115","98052","98117"))
+```
+
+Some preliminary wrangling was done to filter the zipcodes with the highest number of sales and to put the zipcode and waterfront variables in the appropriate format(s) in preparation for the ANOVA analysis to be conducted later on.
+
+## Preliminary variable analysis
+
+The following were the set of analyses first performed to see whether any transformations would be necessary
+
+1. Price-Bedroom scatterplot
+
+```{r}
+xyplot(price~bedrooms, main="House Price vs. Number of Bedrooms", data=sales)
+with(sales, cor(price,bedrooms))
+```
+ 
+2. Price-Bathrooms scatterplot
+
+```{r}
+xyplot(price~bathrooms, main="House Price vs. Number of Bathrooms", data=sales)
+with(sales, cor(price,bathrooms))
+```
+
+3. Price and square footage scatterplot
+
+```{r}
+xyplot(price~sqft_lot, main="House Price vs. Square Footage", data=sales)
+with(sales, cor(price,sqft_lot))
+```
+
+Of all the bivariate relationships explored, the plot involving square footage of the property and price seemed to have an issue with linearity. The log transfromation below was explored to see whether this can be fixed:
+
+```{r}
+xyplot(price~log(sqft_lot), main="House Price vs. Square Footage", data=sales)
+with(sales, cor(price,log(sqft_lot)))
+```
+
+After a log transformation on the response, we noticed that the our two variables still didn't exhibit much of the linear relationship we hoped they would. However, it is worth noting that thos transformation slightly improves the correlation coefficent from 0.04 to 0.14. We proceeded on with this new found knowledge to see whether a simple linear regression would be feasible but first, we had to check whether other conditions were satisfied after the transformation:
+
+```{r}
+xyplot(price~log(sqft_lot), main="House Price vs. Square Footage", data=sales)
+with(sales, cor(price,sqft_lot))
+fm<-lm(price~log(sqft_lot),data=sales)
+plot(fm,which=1)
+plot(fm,which=2)
+```
+
+Constant variance and and normality of error terms wasn't achieved as can be seen in the respective fitted and QQ plot. A randomization test to test for significance was used instead since it is not dependent on any conditions
+
+## Randomization test
+
+```{r}
+t<-do(1000)*(cor(shuffle(sales$sqft_lot),sales$price))
+hist(t$result)
+with(sales, cor(price,sqft_lot))
+savecor<-t$result
+pdata(savecor,.036,lower.tail=FALSE) 
+qdata(savecor, c(0.025, 0.975))
+```
+One way ANOVA: exploring conditions
+
+```{r}
+bwplot(price~waterfront, main="House Price vs Waterfront View", xlab="Waterfront View", data=sales)
+```
+
+Side by side boxplots of house price by waterfront view supports earlier univariate analysis as waterfront properties seem to have higher median price. Whether this difference is significant is something to be evaluated in a regression.
+
+Two - Way ANOVA
+
+```{r}
+bwplot(price~zipcode, main="House Price vs Zipcode", data=sales)
+```
