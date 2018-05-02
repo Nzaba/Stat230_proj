@@ -1,0 +1,200 @@
+---
+title: "Technical Appendix"
+author: "Sam Schneider, Ray Saitoti, and Brian Burrows, "
+date: "5/2/2018"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+#**Data Read In**
+
+
+```{r}
+require(readr)
+require(mosaic)
+require(MASS)
+require(car)
+groupcdata <- read_csv("https://awagaman.people.amherst.edu/stat230/projectsS18/groupCdataS18.csv")
+
+```
+
+
+
+##**Data Section**
+
+  **Filtering and Wrangling the Data**
+  
+  We wanted to change the year, month, and date to the right format while also selecting for the 5 ZIP Codes that had the highest volume of sales.
+  
+```{r}
+
+#Change Year, Month and Date to right format
+#Filter zipcodes of interest
+sales<-groupcdata %>% 
+  mutate(condition=as.factor(condition),id=1:n(),waterfront=as.factor(waterfront),zipcode=as.factor(zipcode)) %>% 
+  filter(zipcode %in% c("98103","98038","98115","98052","98117"))
+```
+
+
+
+  
+  **Preliminary Univariate Analysis**
+
+
+*Price*
+
+The average price of a home in this market is $557,996 although this number is likely subject to outliers as shown by the density plot. Accordingly, the median is a lower value of $525,000.
+```{r}
+fav_stats(sales$price)
+densityplot(sales$price)
+```
+
+
+
+  *Condition and Floors*
+
+The majority of houses in this market only have one floor and it is very rare to have more than 2 floors. Furthermore, the majority of the homes are in above average condition as most homes are graded at a 3 or above. 
+```{r}
+histogram(sales$condition)
+histogram(sales$floors)
+```
+
+
+  *Square Footage of the Lot*
+
+The values for sqft in this market is extremely distorted by outliers. The mean value is roughly 10,000 square feet while the median is roughly half of the mean. This will be an important factor to consider as we continue our analysis.
+
+```{r}
+favstats(sales$sqft_lot)
+densityplot(sales$sqft_lot)
+```
+
+  
+  *Waterfront*
+  
+It is very rare to have a waterfront home in this market. This could make it very valuable in terms of the price of the home.
+
+```{r}
+tally(sales$waterfront)
+```
+
+
+
+**Preliminary Bivariate Analysis**
+
+We begin with simple analyses of the relationships price has with each of our predictors to see if transformations are necessary.
+
+
+  *Price and Bedrooms*.
+
+```{r}
+xyplot(price~bedrooms, main="House Price vs. Number of Bedrooms", data=sales)
+with(sales, cor(price,bedrooms))
+```
+From the graph, we see that baseline home values seem to increase as the the number of bedrooms increases. However, home values seem to increase up to six bedrooms and decrease afterwards. This might most likely be the result of a small sample size for houses with more bedrooms than that. It might be worthwhile to consider bedrooms and zipcode together in future analysis. There is also one extreme outlier with more than thirty rooms. We might want to consider looking more closely at that point to determine if we should remove it. Also, as expected, home price and number of bedrooms seems to be positively correlated, although weakly so.
+
+
+
+  *Price and Bathrooms*.
+
+```{r}
+xyplot(price~bathrooms, main="House Price vs. Number of Bathrooms", data=sales)
+with(sales, cor(price,bathrooms))
+```
+
+The graph indicates a moderate positive relationship between price and number of bathrooms. However, it is worthwhile noting that there are far fewer observations for houses with five or more bathrooms. This might limit the scope to which we may predictions out of fear of extrapolation beyond the data.
+
+
+
+ *Price and Lot Square Footage*.
+
+```{r}
+xyplot(price~sqft_lot, main="House Price vs. Square Footage", data=sales)
+with(sales, cor(price,sqft_lot))
+```
+
+The graph of house price and square footage indicates that transformations will most likely be required. Furthermore, very few observations exist for homes of more than 500,000 square feet. In addition, a correlation test indicates that price and square footage is very weakly positively correlated, which is expectated but not readily shown by the graph. 
+
+```{r}
+xyplot(price~log(sqft_lot), main="House Price vs. Square Footage", data=sales)
+#This transformation that I think looks best. However, the data does not exhibit much of a linear relationship and might not be worth using in the final model. 
+with(sales, cor(price,log(sqft_lot)))
+```
+
+A log transformation of lot square footage improves the legibility of the graph and strengthens the correlation between square footage and house price.
+
+  *Price and Floors*.
+
+```{r}
+xyplot(price~floors, main="House Price vs. Number of Floors", data=sales)
+with(sales, cor(price,floors))
+```
+
+While the scatterplot was not particularly informative, a correlation test shows that price and number of floors are weakly positively correlated. However, the scatterplot does elucidate a number of high outliers that should be examined more closely, especially the one for 2.5 floors.
+
+
+  *Price and Condition*.
+
+```{r}
+bwplot(price~condition, main="House Price vs Home Condition", xlab=" Home Condition", data=sales)
+```
+
+The side-by-side boxplots of price by house condition shows fairly similar medians for each home condition group. Interestingly, there are a number of outliers for homes with conditions rated three or higher. This might be explained by location or age data in additional analysis. Also, an ANOVA will be run to see if the differences in house price between condition groups is significant.
+
+
+  *Price and Zipcode*.
+
+```{r}
+bwplot(price~zipcode, main="House Price vs Zipcode", data=sales)
+```
+
+
+Boxplots of price by zip-code seem to indicate differences in house price by zip-code. An ANOVA will be run to see if any of the differences are significant. It also seems like there are alot of outliers for each of the zipcodes.
+
+
+  *Price vs. Living Space Square Footage*
+
+```{r}
+xyplot(price~sqft_living, data=sales)
+with(sales, cor(price,sqft_living))
+```
+
+The scatterplot of price and house square footage shows a weak to moderate positive linear correlation. The correlation coefficient is approximately 0.61, which is moderately strong.
+
+
+
+###**Variable Transformations**
+
+We suspect that our price vs square footage plot might need a log transformation. However, we find that the conditions are still not satisfied after making this transformation. There is still a problem with the distribution of error terms as seen in the variation across the fitted values. Thus, we shall run the randomization test below to test the significance of the relationship between price and square footage.
+
+```{r}
+xyplot(log(price)~sqft_lot, main="House Price vs. Square Footage", data=sales)
+with(sales, cor(price,sqft_lot))
+fm<-lm(log(price)~sqft_lot,data=sales)
+plot(fm,which=1)
+plot(fm,which=2)
+```
+
+
+
+
+
+
+####**Randomization-Based Procedure**
+
+Given that the log transformation was unsuccessful, we utilized a randomization test to examine the correlation between SQFT of the lot and price. The corresponding correlation coefficient was .036 with a 95% confidence interval between -0.035 and 0.041. As 0 falls within the 85% interval, we can conclude that there is no significant correlation between price and sqft. 
+
+```{r}
+t<-do(1000)*(cor(shuffle(sales$sqft_lot),sales$price))
+hist(t$result)
+with(sales, cor(price,sqft_lot))
+savecor<-t$result
+pdata(savecor,.036,lower.tail=FALSE) 
+qdata(savecor, c(0.025, 0.975))
+```
