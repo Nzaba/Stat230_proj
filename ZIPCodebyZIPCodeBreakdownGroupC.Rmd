@@ -1,0 +1,96 @@
+---
+title: "Sales breakdown for different ZIP Codes GroupC"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+date: "5/1/2018"
+---
+
+**Read in the data**
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  tidy=FALSE,     # display code as typed
+  size="small", warning=FALSE, message=FALSE)
+```
+
+```{r}
+require(readr)
+require(mosaic)
+require(MASS)
+require(car)
+library(ggmap)
+library(mapproj)
+groupcdata <- read_csv("https://awagaman.people.amherst.edu/stat230/projectsS18/groupCdataS18.csv")
+```
+
+
+```{r}
+groupcdata <- read_csv("https://awagaman.people.amherst.edu/stat230/projectsS18/groupCdataS18.csv")
+sales<-groupcdata %>% 
+  mutate(condition=as.factor(condition),id=1:n(),waterfront=as.factor(waterfront),zipcode=as.factor(zipcode)) %>% 
+  filter(zipcode %in% c("98103","98038","98115","98052","98117"))
+```
+
+Sale Prices in 98038 ZIP Code
+```{r}
+
+map <- get_map(location = '98038', zoom = 12)
+
+sales_98038 <- sales %>%
+  filter(zipcode == "98038")
+ggmap(map) +
+  geom_point(data = sales_98038, aes(x = long, y = lat, color = zipcode, alpha = price)) +
+  labs(x="Longitude", y="Latitude")+ 
+    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98038 ZIP code") + scale_alpha_continuous()
+```
+
+Sale Prices in 98103 ZIP Code
+```{r}
+map <- get_map(location = '98103', zoom = 13)
+
+sales_98103 <- sales %>%
+  filter(zipcode == "98103")
+ggmap(map) +
+  geom_point(data = sales_98103, aes(x = long, y = lat, color = zipcode, alpha = price)) +
+  labs(x="Longitude", y="Latitude")+ 
+    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98103 ZIP code") + scale_alpha_continuous()
+```
+
+Sale Prices in 98052 ZIP Code
+```{r}
+map <- get_map(location = '98052', zoom = 11)
+
+sales_98052 <- sales %>%
+  filter(zipcode == "98052")
+ggmap(map) +
+  geom_point(data = sales_98052, aes(x = long, y = lat, color = zipcode, alpha = price)) +
+  labs(x="Longitude", y="Latitude")+ 
+    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98052 ZIP code") + scale_alpha_continuous()
+```
+
+Sale Prices in 98115 ZIP Code
+```{r}
+map <- get_map(location = '98115', zoom = 13)
+
+sales_98115 <- sales %>%
+  filter(zipcode == "98115")
+ggmap(map) +
+  geom_point(data = sales_98115, aes(x = long, y = lat, color = zipcode, alpha = price)) +
+  labs(x="Longitude", y="Latitude")+ 
+    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98115 ZIP code") + scale_alpha_continuous()
+```
+
+Sale Prices in 98117 ZIP Code
+```{r}
+map <- get_map(location = '98117', zoom = 14)
+
+sales_98117 <- sales %>%
+  filter(zipcode == "98117")
+ggmap(map) +
+  geom_point(data = sales_98117, aes(x = long, y = lat, color = zipcode, alpha = price)) +
+  labs(x="Longitude", y="Latitude")+ 
+    scale_color_manual(values = c("darkgreen"), guide = FALSE) + ggtitle("Distribution of Sale Price in 98117 ZIP code") + scale_alpha_continuous()
+```
+
