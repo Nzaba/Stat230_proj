@@ -1,0 +1,45 @@
+---
+title: "Heat map GroupC"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+date: "5/1/2018"
+---
+
+**Read in the data**
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  tidy=FALSE,     # display code as typed
+  size="small", warning=FALSE, message=FALSE)
+```
+
+```{r}
+require(readr)
+require(mosaic)
+require(MASS)
+require(car)
+library(ggmap)
+library(mapproj)
+groupcdata <- read_csv("https://awagaman.people.amherst.edu/stat230/projectsS18/groupCdataS18.csv")
+```
+
+
+```{r}
+groupcdata <- read_csv("https://awagaman.people.amherst.edu/stat230/projectsS18/groupCdataS18.csv")
+sales<-groupcdata %>% 
+  mutate(condition=as.factor(condition),id=1:n(),waterfront=as.factor(waterfront),zipcode=as.factor(zipcode)) %>% 
+  filter(zipcode %in% c("98103","98038","98115","98052","98117"))
+```
+
+```{r}
+#Heatmap showing where the sales are happening across all ZIP codes, use this to show why we are focusing on the 5 zip codes
+map <- get_map(location = 'Seattle')
+ggmap(map, extent = "device") + geom_density2d(data = groupcdata, aes(x = long, y = lat)) + stat_density2d(data = groupcdata, aes(x = long, y = lat, fill = ..level.., alpha = ..level..), size = .01, bins = 16, geom = "polygon") + scale_fill_gradient(low = "yellow", high = "red") +scale_alpha_continuous(guide = FALSE) + ggtitle("Where Sales Are Happening in King County")
+```
+
+
+
+
+
